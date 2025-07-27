@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 
+console.log('Firebase configuration loading...');
+
 const firebaseConfig = {
   apiKey: "AIzaSyBmQO8JP9SxsUmHYS782yMpsVcoRk1_pVM",
   authDomain: "SmartTraffic.firebaseapp.com",
@@ -13,7 +15,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+console.log('Initializing Firebase app...');
 const app = initializeApp(firebaseConfig);
 
 // Initialize Realtime Database and get a reference to the service
+console.log('Initializing Firebase database...');
 export const database = getDatabase(app);
+console.log('Firebase initialized successfully');

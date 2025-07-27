@@ -4,6 +4,8 @@ import { database } from '@/lib/firebase';
 import { ref, onValue, off } from 'firebase/database';
 import { Card } from '@/components/ui/card';
 
+console.log('TrafficVisualization component loaded');
+
 interface TrafficData {
   vehicle_count: number;
   emergency_lane: number[];
@@ -11,6 +13,8 @@ interface TrafficData {
 }
 
 const TrafficVisualization: React.FC = () => {
+  console.log('TrafficVisualization rendering...');
+  
   const [trafficData, setTrafficData] = useState<TrafficData>({
     vehicle_count: 0,
     emergency_lane: [],
@@ -45,13 +49,19 @@ const TrafficVisualization: React.FC = () => {
 
   // Firebase real-time connection
   useEffect(() => {
+    console.log('Setting up Firebase connection...');
     const trafficRef = ref(database, 'traffic');
     
     const unsubscribe = onValue(trafficRef, (snapshot) => {
+      console.log('Firebase data received:', snapshot.val());
       const data = snapshot.val();
       if (data) {
         setTrafficData(data);
         setIsConnected(true);
+        console.log('Traffic data updated:', data);
+      } else {
+        console.log('No data received from Firebase');
+        setIsConnected(false);
       }
     }, (error) => {
       console.error('Firebase connection error:', error);
@@ -220,8 +230,16 @@ const TrafficVisualization: React.FC = () => {
     );
   };
 
+  console.log('Rendering TrafficVisualization with data:', trafficData);
+
   return (
     <div className="w-full space-y-6">
+      {/* Debug info */}
+      <div className="text-sm text-muted-foreground p-2 bg-muted rounded">
+        Debug: Component loaded, Firebase connected: {isConnected ? 'Yes' : 'No'}, 
+        Vehicle count: {trafficData.vehicle_count}
+      </div>
+      
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Smart Traffic Monitor</h1>
