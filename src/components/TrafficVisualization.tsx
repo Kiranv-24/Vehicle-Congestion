@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Group } from 'react-konva';
+import React, { useEffect, useState } from 'react';
 import { database } from '@/lib/firebase';
 import { ref, onValue, off } from 'firebase/database';
 import { Card } from '@/components/ui/card';
@@ -21,8 +20,6 @@ const TrafficVisualization: React.FC = () => {
     lane_vehicle_counts: { "1": 0, "2": 0, "3": 0, "4": 0 }
   });
   const [isConnected, setIsConnected] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 600, height: 600 });
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Lane configuration: 1=North, 2=East, 3=South, 4=West
   const laneConfig = {
@@ -31,21 +28,6 @@ const TrafficVisualization: React.FC = () => {
     "3": { name: "South", color: "#f59e0b", direction: "vertical", side: "bottom" },
     "4": { name: "West", color: "#10b981", direction: "horizontal", side: "left" }
   };
-
-  // Update dimensions on resize
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const size = Math.min(rect.width, rect.height, 600);
-        setDimensions({ width: size, height: size });
-      }
-    };
-
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
 
   // Firebase real-time connection
   useEffect(() => {
@@ -75,7 +57,7 @@ const TrafficVisualization: React.FC = () => {
     const dots = [];
     const isEmergency = trafficData.emergency_lane.includes(parseInt(laneId));
     const dotRadius = 4;
-    const spacing = 12;
+    const spacing = 15;
 
     for (let i = 0; i < count; i++) {
       let dotX, dotY;
@@ -90,17 +72,20 @@ const TrafficVisualization: React.FC = () => {
       }
 
       dots.push(
-        <Circle
+        <circle
           key={`${laneId}-${i}`}
-          x={dotX}
-          y={dotY}
-          radius={isEmergencyVehicle ? dotRadius + 1 : dotRadius}
+          cx={dotX}
+          cy={dotY}
+          r={isEmergencyVehicle ? dotRadius + 1 : dotRadius}
           fill={isEmergencyVehicle ? "#ef4444" : laneConfig[laneId as keyof typeof laneConfig].color}
-          stroke={isEmergencyVehicle ? "#dc2626" : undefined}
+          stroke={isEmergencyVehicle ? "#dc2626" : "none"}
           strokeWidth={isEmergencyVehicle ? 2 : 0}
-          shadowColor={isEmergencyVehicle ? "#ef4444" : laneConfig[laneId as keyof typeof laneConfig].color}
-          shadowBlur={isEmergencyVehicle ? 8 : 4}
-          shadowOpacity={0.6}
+          className={isEmergencyVehicle ? "animate-pulse" : ""}
+          style={{
+            filter: isEmergencyVehicle 
+              ? "drop-shadow(0 0 8px #ef4444)" 
+              : `drop-shadow(0 0 4px ${laneConfig[laneId as keyof typeof laneConfig].color})`
+          }}
         />
       );
     }
@@ -109,55 +94,57 @@ const TrafficVisualization: React.FC = () => {
   };
 
   const renderIntersection = () => {
-    const centerX = dimensions.width / 2;
-    const centerY = dimensions.height / 2;
+    const width = 600;
+    const height = 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
     const roadWidth = 60;
     const intersectionSize = 80;
     const laneWidth = 25;
 
     return (
-      <Group>
+      <svg width={width} height={height} className="border border-border rounded-lg bg-traffic-road">
         {/* Road backgrounds */}
         {/* Vertical road */}
-        <Rect
+        <rect
           x={centerX - roadWidth / 2}
           y={0}
           width={roadWidth}
-          height={dimensions.height}
+          height={height}
           fill="#1e293b"
-          cornerRadius={4}
+          rx={4}
         />
         
         {/* Horizontal road */}
-        <Rect
+        <rect
           x={0}
           y={centerY - roadWidth / 2}
-          width={dimensions.width}
+          width={width}
           height={roadWidth}
           fill="#1e293b"
-          cornerRadius={4}
+          rx={4}
         />
 
         {/* Central intersection */}
-        <Rect
+        <rect
           x={centerX - intersectionSize / 2}
           y={centerY - intersectionSize / 2}
           width={intersectionSize}
           height={intersectionSize}
           fill="#334155"
-          cornerRadius={8}
+          rx={8}
         />
 
         {/* Lane dividers */}
         {/* Vertical lanes */}
-        <Rect
+        <rect
           x={centerX - 1}
           y={0}
           width={2}
           height={centerY - intersectionSize / 2}
           fill="#64748b"
         />
-        <Rect
+        <rect
           x={centerX - 1}
           y={centerY + intersectionSize / 2}
           width={2}
@@ -165,14 +152,14 @@ const TrafficVisualization: React.FC = () => {
         />
 
         {/* Horizontal lanes */}
-        <Rect
+        <rect
           x={0}
           y={centerY - 1}
           width={centerX - intersectionSize / 2}
           height={2}
           fill="#64748b"
         />
-        <Rect
+        <rect
           x={centerX + intersectionSize / 2}
           y={centerY - 1}
           width={centerX - intersectionSize / 2}
@@ -185,48 +172,52 @@ const TrafficVisualization: React.FC = () => {
         {renderVehicleDots("1", trafficData.lane_vehicle_counts["1"] || 0, centerX - laneWidth/2, 80, "vertical", "top")}
         
         {/* East Lane (2) */}
-        {renderVehicleDots("2", trafficData.lane_vehicle_counts["2"] || 0, dimensions.width - 80, centerY - laneWidth/2, "horizontal", "right")}
+        {renderVehicleDots("2", trafficData.lane_vehicle_counts["2"] || 0, width - 80, centerY - laneWidth/2, "horizontal", "right")}
         
         {/* South Lane (3) */}
-        {renderVehicleDots("3", trafficData.lane_vehicle_counts["3"] || 0, centerX + laneWidth/2, dimensions.height - 80, "vertical", "bottom")}
+        {renderVehicleDots("3", trafficData.lane_vehicle_counts["3"] || 0, centerX + laneWidth/2, height - 80, "vertical", "bottom")}
         
         {/* West Lane (4) */}
         {renderVehicleDots("4", trafficData.lane_vehicle_counts["4"] || 0, 80, centerY + laneWidth/2, "horizontal", "left")}
 
         {/* Lane labels */}
-        <Text
+        <text
           x={centerX - 20}
           y={30}
-          text="NORTH"
-          fontSize={12}
+          fontSize="12"
           fill="#6366f1"
-          fontStyle="bold"
-        />
-        <Text
-          x={dimensions.width - 60}
+          fontWeight="bold"
+        >
+          NORTH
+        </text>
+        <text
+          x={width - 60}
           y={centerY - 40}
-          text="EAST"
-          fontSize={12}
+          fontSize="12"
           fill="#a855f7"
-          fontStyle="bold"
-        />
-        <Text
+          fontWeight="bold"
+        >
+          EAST
+        </text>
+        <text
           x={centerX - 20}
-          y={dimensions.height - 20}
-          text="SOUTH"
-          fontSize={12}
+          y={height - 20}
+          fontSize="12"
           fill="#f59e0b"
-          fontStyle="bold"
-        />
-        <Text
+          fontWeight="bold"
+        >
+          SOUTH
+        </text>
+        <text
           x={20}
           y={centerY - 40}
-          text="WEST"
-          fontSize={12}
+          fontSize="12"
           fill="#10b981"
-          fontStyle="bold"
-        />
-      </Group>
+          fontWeight="bold"
+        >
+          WEST
+        </text>
+      </svg>
     );
   };
 
@@ -256,12 +247,8 @@ const TrafficVisualization: React.FC = () => {
         <div className="lg:col-span-2">
           <Card className="p-6 bg-card border-border">
             <h2 className="text-xl font-semibold mb-4 text-card-foreground">Intersection View</h2>
-            <div ref={containerRef} className="w-full flex justify-center">
-              <Stage width={dimensions.width} height={dimensions.height}>
-                <Layer>
-                  {renderIntersection()}
-                </Layer>
-              </Stage>
+            <div className="w-full flex justify-center">
+              {renderIntersection()}
             </div>
           </Card>
         </div>
@@ -304,7 +291,7 @@ const TrafficVisualization: React.FC = () => {
                         {config.name} (Lane {laneId})
                       </span>
                       {isEmergency && (
-                        <span className="text-xs bg-destructive text-destructive-foreground px-2 py-1 rounded-full">
+                        <span className="text-xs bg-destructive text-destructive-foreground px-2 py-1 rounded-full animate-pulse">
                           EMERGENCY
                         </span>
                       )}
@@ -325,7 +312,7 @@ const TrafficVisualization: React.FC = () => {
                 <span className="text-muted-foreground">Normal Vehicle</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-destructive" />
+                <div className="w-3 h-3 rounded-full bg-destructive animate-pulse" />
                 <span className="text-muted-foreground">Emergency Vehicle</span>
               </div>
               <div className="flex items-center gap-2">
