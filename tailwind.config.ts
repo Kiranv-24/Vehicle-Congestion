@@ -61,6 +61,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				traffic: {
+					north: 'hsl(var(--traffic-north))',
+					east: 'hsl(var(--traffic-east))',
+					south: 'hsl(var(--traffic-south))',
+					west: 'hsl(var(--traffic-west))',
+					emergency: 'hsl(var(--traffic-emergency))',
+					road: 'hsl(var(--traffic-road))',
+					intersection: 'hsl(var(--traffic-intersection))'
 				}
 			},
 			borderRadius: {
