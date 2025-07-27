@@ -55,7 +55,7 @@ const TrafficVisualization: React.FC = () => {
 
   const renderVehicleDots = (laneId: string, count: number, x: number, y: number, direction: string, side: string) => {
     const dots = [];
-    const isEmergency = trafficData.emergency_lane.includes(parseInt(laneId));
+    const isEmergency = trafficData.emergency_lane?.includes(parseInt(laneId)) || false;
     const dotRadius = 4;
     const spacing = 15;
 
@@ -266,7 +266,7 @@ const TrafficVisualization: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Emergency Lanes</span>
                 <span className="font-bold text-destructive">
-                  {trafficData.emergency_lane.length > 0 ? trafficData.emergency_lane.join(', ') : 'None'}
+                  {trafficData.emergency_lane?.length > 0 ? trafficData.emergency_lane.join(', ') : 'None'}
                 </span>
               </div>
             </div>
@@ -277,7 +277,7 @@ const TrafficVisualization: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4 text-card-foreground">Lane Details</h3>
             <div className="space-y-3">
               {Object.entries(laneConfig).map(([laneId, config]) => {
-                const isEmergency = trafficData.emergency_lane.includes(parseInt(laneId));
+                const isEmergency = trafficData.emergency_lane?.includes(parseInt(laneId)) || false;
                 const count = trafficData.lane_vehicle_counts[laneId] || 0;
                 
                 return (
