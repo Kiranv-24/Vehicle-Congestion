@@ -4,14 +4,14 @@ import { getDatabase } from 'firebase/database';
 console.log('Firebase configuration loading...');
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBmQO8JP9SxsUmHYS782yMpsVcoRk1_pVM",
-  authDomain: "SmartTraffic.firebaseapp.com",
-  databaseURL: "https://smarttraffic-75651-default-rtdb.firebaseio.com/",
-  projectId: "smarttraffic-75651",
-  storageBucket: "SmartTraffic.appspot.com",
-  messagingSenderId: "398865577507",
-  appId: "1:398865577507:web:5bc5c5441bea11158a6396",
-  measurementId: "G-VLD5XT2R5J"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
